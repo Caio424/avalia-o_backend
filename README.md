@@ -2,7 +2,7 @@
 
 Este tutorial descreve a implementação de uma API RESTful utilizando **FastAPI** que emprega **Machine Learning (NLP)** para classificar mensagens de texto. Diferente de abordagens baseadas em palavras-chave simples, este projeto utiliza um modelo **Transformer Zero-Shot** para entender a intenção semântica do usuário.
 
-## 📋 Visão Geral do Projeto
+##  Visão Geral do Projeto
 
 O sistema recebe mensagens de usuários e as classifica em categorias predefinidas para direcionar o atendimento automaticamente.
 
@@ -10,7 +10,7 @@ O sistema recebe mensagens de usuários e as classifica em categorias predefinid
 - **Tecnologia Principal**: `transformers` (Hugging Face) + `pytorch`.
 - **Modelo Utilizado**: `valhalla/distilbart-mnli-12-1` (Versão destilada e eficiente do BART para classificação MNLI/Zero-Shot).
 
-## �️ Pré-requisitos
+##  Pré-requisitos
 
 Para rodar este projeto, certifique-se de ter:
 
@@ -18,7 +18,7 @@ Para rodar este projeto, certifique-se de ter:
 - **pip** atualizado.
 - **Conexão com a Internet** (necessária na primeira execução para baixar o modelo de ~300MB).
 
-## 🚀 Instalação e Configuração
+##  Instalação e Configuração
 
 ### 1. Preparação do Ambiente
 
@@ -39,7 +39,7 @@ pip install -r requirements.txt
 > [!IMPORTANT]
 > A instalação do PyTorch pode demorar alguns minutos dependendo da sua conexão.
 
-## ▶️ Executando a Aplicação
+##  Executando a Aplicação
 
 ### Iniciando o Servidor
 
@@ -59,22 +59,22 @@ python main.py
 
 O sistema estará disponível em: [http://localhost:8080/](http://localhost:8080/)
 
-## 🖥️ Interfaces do Sistema
+##  Interfaces do Sistema
 
 O projeto conta com duas interfaces frontend simples para demonstração:
 
-### 1. 👤 Portal do Cliente
+### 1.  Portal do Cliente
 **URL**: [http://localhost:8080/](http://localhost:8080/)
 - Interface limpa para o usuário final enviar suas dúvidas.
 - Exibe o feedback instantâneo com a classificação e solução sugerida pela IA.
 
-### 2. 🔧 Dashboard do Técnico
+### 2.  Dashboard do Técnico
 **URL**: [http://localhost:8080/tecnico](http://localhost:8080/tecnico)
 - Visão estilo **Kanban** das mensagens recebidas.
 - As mensagens são organizadas automaticamente nas colunas baseadas na classificação da IA.
 - Atualização em tempo real (polling a cada 10s).
 
-## 🧠 Arquitetura e Lógica de Classificação
+##  Arquitetura e Lógica de Classificação
 
 Este é o diferencial técnico do projeto. Em vez de `if/else` com palavras-chave, usamos inferência probabilística.
 
@@ -111,7 +111,7 @@ sequenceDiagram
     API-->>Dashboard: Lista de Tickets Classificados
 ```
 
-## 🔍 Testando via API
+##  Testando via API
 
 Você pode testar diretamente via `curl` ou Postman:
 
@@ -133,7 +133,7 @@ curl -X POST "http://localhost:8080/classificar" \
 }
 ```
 
-## 📁 Estrutura de Arquivos
+##  Estrutura de Arquivos
 
 - `main.py`: Controlador principal (FastAPI) e rotas.
 - `classifier.py`: Módulo de IA. Contém o pipeline do Hugging Face e a lógica de re-ranking.
