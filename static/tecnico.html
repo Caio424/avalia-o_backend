@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Técnico</title>
+    <style>
+        :root {
+            --bg-color: #f0f2f5;
+            --header-bg: #2c3e50;
+            --text-color: #333;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        header {
+            background-color: var(--header-bg);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        .refresh-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .refresh-btn:hover {
+            background: #2980b9;
+        }
+
+        .board {
+            display: flex;
+            flex: 1;
+            padding: 20px;
+            gap: 20px;
+            overflow-x: auto;
+        }
+
+        .column {
+            flex: 1;
+            min-width: 300px;
+            background: #e2e4e6;
+            border-radius: 8px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .column-header {
+            font-weight: bold;
+            text-transform: uppercase;
+            padding: 10px;
+            color: #555;
+            border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+            margin-bottom: 10px;
+        }
+
+        .cards-container {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 10px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid #ccc;
+        }
+
+        .card-msg {
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+
+        .card-solution {
+            font-size: 0.9rem;
+            color: #27ae60;
+            background: #f0fff4;
+            padding: 5px;
+            border-radius: 4px;
+            margin-top: 5px;
+        }
+
+        .card-meta {
+            font-size: 0.8rem;
+            color: #999;
+            margin-top: 8px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* Category Colors */
+        .col-fin {
+            border-top: 4px solid #e67e22;
+        }
+
+        .col-sup {
+            border-top: 4px solid #e74c3c;
+        }
+
+        .col-sau {
+            border-top: 4px solid #27ae60;
+        }
+
+        .col-out {
+            border-top: 4px solid #95a5a6;
+        }
+
+        .card.fin {
+            border-left-color: #e67e22;
+        }
+
+        .card.sup {
+            border-left-color: #e74c3c;
+        }
+
+        .card.sau {
+            border-left-color: #27ae60;
+        }
+
+        .card.out {
+            border-left-color: #95a5a6;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>🔧 Painel do Técnico</h1>
+        <button class="refresh-btn" onclick="loadMessages()">Atualizar</button>
+    </header>
+
+    <div class="board">
+        <!-- Financeiro -->
+        <div class="column col-fin">
+            <div class="column-header">Financeiro / Vendas (<span id="count-fin">0</span>)</div>
+            <div class="cards-container" id="list-fin"></div>
+        </div>
+
+        <!-- Suporte -->
+        <div class="column col-sup">
+            <div class="column-header">Suporte Técnico (<span id="count-sup">0</span>)</div>
+            <div class="cards-container" id="list-sup"></div>
+        </div>
+
+        <!-- Saudação -->
+        <div class="column col-sau">
+            <div class="column-header">Saudação (<span id="count-sau">0</span>)</div>
+            <div class="cards-container" id="list-sau"></div>
+        </div>
+
+        <!-- Outros -->
+        <div class="column col-out">
+            <div class="column-header">Outros (<span id="count-out">0</span>)</div>
+            <div class="cards-container" id="list-out"></div>
+        </div>
+    </div>
+
+    <script>
+        async function loadMessages() {
+            try {
+                const response = await fetch('/mensagens');
+                const messages = await response.json();
+                renderMessages(messages);
+            } catch (error) {
+                console.error("Erro ao carregar mensagens:", error);
+                alert("Erro ao conectar com servidor.");
+            }
+        }
+
+        function renderMessages(messages) {
+            // Clear lists
+            document.getElementById('list-fin').innerHTML = '';
+            document.getElementById('list-sup').innerHTML = '';
+            document.getElementById('list-sau').innerHTML = '';
+            document.getElementById('list-out').innerHTML = '';
+
+            const counts = { fin: 0, sup: 0, sau: 0, out: 0 };
+
+            messages.forEach(msg => {
+                let listId = 'list-out';
+                let cardClass = 'out';
+                let countKey = 'out';
+
+                if (msg.categoria === "Financeiro/Vendas") {
+                    listId = 'list-fin'; cardClass = 'fin'; countKey = 'fin';
+                } else if (msg.categoria === "Suporte Técnico") {
+                    listId = 'list-sup'; cardClass = 'sup'; countKey = 'sup';
+                } else if (msg.categoria === "Saudação") {
+                    listId = 'list-sau'; cardClass = 'sau'; countKey = 'sau';
+                }
+
+                counts[countKey]++;
+
+                const card = document.createElement('div');
+                card.className = `card ${cardClass}`;
+                card.innerHTML = `
+                <div class="card-msg">"${msg.mensagem}"</div>
+                <div style="font-size: 0.85rem; color: #666;">${msg.explicacao}</div>
+                <div class="card-solution">🛠️ ${msg.solucao_tecnica}</div>
+                <div class="card-meta">
+                    <span>Confiança: ${msg.confianca}</span>
+                </div>
+            `;
+
+                document.getElementById(listId).prepend(card); // Newest first
+            });
+
+            // Update counts
+            document.getElementById('count-fin').innerText = counts.fin;
+            document.getElementById('count-sup').innerText = counts.sup;
+            document.getElementById('count-sau').innerText = counts.sau;
+            document.getElementById('count-out').innerText = counts.out;
+        }
+
+        // Load on start
+        loadMessages();
+        // Auto refresh every 10s
+        setInterval(loadMessages, 10000);
+    </script>
+
+</body>
+
+</html>

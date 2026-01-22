@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Área do Cliente - Suporte</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --background-color: #ecf0f1;
+            --card-color: #ffffff;
+            --text-color: #333;
+            --success-color: #27ae60;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            background-color: var(--card-color);
+            padding: 2.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+            text-align: center;
+        }
+
+        p.subtitle {
+            text-align: center;
+            color: #7f8c8d;
+            margin-bottom: 2rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        textarea {
+            width: 100%;
+            height: 120px;
+            padding: 12px;
+            border: 2px solid #bdc3c7;
+            border-radius: 8px;
+            resize: vertical;
+            font-family: inherit;
+            margin-bottom: 1.5rem;
+            box-sizing: border-box;
+            transition: border-color 0.3s;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        button:disabled {
+            background-color: #95a5a6;
+            cursor: not-allowed;
+        }
+
+        #resultArea {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            border-radius: 8px;
+            background-color: #e8f6f3;
+            /* Light green tint */
+            border-left: 5px solid var(--success-color);
+            display: none;
+            animation: slideDown 0.4s ease-out;
+        }
+
+        #resultArea h3 {
+            margin-top: 0;
+            color: var(--success-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .solution-box {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .category-badge {
+            display: inline-block;
+            background-color: #95a5a6;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            margin-bottom: 10px;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>Portal do Cliente</h1>
+        <p class="subtitle">Descreva seu problema e receba ajuda imediata</p>
+
+        <label for="messageInput">Como podemos ajudar hoje?</label>
+        <textarea id="messageInput"
+            placeholder="Ex: Não consigo acessar minha conta ou preciso da segunda via do boleto..."></textarea>
+
+        <button id="classifyBtn" onclick="classifyText()">Enviar Solicitação</button>
+
+        <div id="resultArea">
+            <h3><span style="font-size: 1.5em">✅</span> Análise Concluída</h3>
+            <p>Recebemos sua mensagem. Com base nela, identificamos que é um assunto de: <span id="categoryResult"
+                    class="category-badge"></span></p>
+
+            <div class="solution-box">
+                <h4>O que você pode fazer:</h4>
+                <p id="solutionResult" style="font-size: 1.1em; color: #2c3e50;"></p>
+            </div>
+
+            <p style="font-size: 0.9em; margin-top: 15px; color: #7f8c8d;">
+                <i>Explicação técnica: <span id="explanationResult"></span></i>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        async function classifyText() {
+            const input = document.getElementById('messageInput');
+            const btn = document.getElementById('classifyBtn');
+            const resultArea = document.getElementById('resultArea');
+            const categoryResult = document.getElementById('categoryResult');
+            const explanationResult = document.getElementById('explanationResult');
+            const solutionResult = document.getElementById('solutionResult');
+
+            const message = input.value.trim();
+
+            if (!message) {
+                alert("Por favor, digite uma mensagem.");
+                return;
+            }
+
+            // UI Feedback
+            btn.disabled = true;
+            btn.innerText = "Analisando...";
+            resultArea.style.display = 'none';
+
+            try {
+                const response = await fetch('/classificar', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ mensagem: message })
+                });
+
+                if (!response.ok) {
+                    throw new Error("Erro na requisição");
+                }
+
+                const data = await response.json();
+
+                // Seta os valores
+                categoryResult.innerText = data.categoria;
+                explanationResult.innerText = data.explicacao;
+                solutionResult.innerText = data.solucao;
+
+                // Cor do badge baseada na categoria (opcional)
+                updateBadgeColor(data.categoria);
+
+                // Mostra resultado
+                resultArea.style.display = 'block';
+
+            } catch (error) {
+                console.error(error);
+                alert("Ocorreu um erro ao processar sua solicitação.");
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Enviar Solicitação";
+            }
+        }
+
+        function updateBadgeColor(category) {
+            const result = document.getElementById('categoryResult');
+            if (category.includes("Financeiro")) result.style.backgroundColor = "#e67e22"; // Orange
+            else if (category.includes("Suporte")) result.style.backgroundColor = "#e74c3c"; // Red
+            else if (category.includes("Saudação")) result.style.backgroundColor = "#27ae60"; // Green
+            else result.style.backgroundColor = "#95a5a6"; // Gray
+        }
+    </script>
+
+</body>
+
+</html>

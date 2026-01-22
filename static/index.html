@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Classificador de Mensagens</title>
+    <style>
+        :root {
+            --primary-color: #4a90e2;
+            --background-color: #f4f7f6;
+            --card-color: #ffffff;
+            --text-color: #333;
+            --result-bg: #e8f0fe;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background-color: var(--card-color);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+            transition: transform 0.2s;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        textarea {
+            width: 100%;
+            height: 120px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            resize: vertical;
+            font-family: inherit;
+            margin-bottom: 1rem;
+            box-sizing: border-box;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: #357abd;
+        }
+
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        #resultArea {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            border-radius: 6px;
+            background-color: var(--result-bg);
+            display: none;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        #resultArea h3 {
+            margin-top: 0;
+            color: var(--primary-color);
+        }
+
+        .category-tag {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>Classificador de Texto</h1>
+
+        <label for="messageInput">Digite sua mensagem:</label>
+        <textarea id="messageInput" placeholder="Ex: Olá, gostaria de saber o preço..."></textarea>
+
+        <button id="classifyBtn" onclick="classifyText()">Classificar Mensagem</button>
+
+        <div id="resultArea">
+            <h3>Resultado:</h3>
+            <p><strong>Categoria:</strong> <br><span id="categoryResult" class="category-tag"></span></p>
+            <p><strong>Explicação:</strong> <span id="explanationResult"></span></p>
+            <p><strong>Ação Sugerida:</strong> <span id="solutionResult"></span></p>
+            <p style="font-size: 0.9em; color: #666;"><strong>Confiança:</strong> <span id="confidenceResult"></span>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        async function classifyText() {
+            const input = document.getElementById('messageInput');
+            const btn = document.getElementById('classifyBtn');
+            const resultArea = document.getElementById('resultArea');
+            const categoryResult = document.getElementById('categoryResult');
+            const explanationResult = document.getElementById('explanationResult');
+            const solutionResult = document.getElementById('solutionResult');
+            const confidenceResult = document.getElementById('confidenceResult');
+
+            const message = input.value.trim();
+
+            if (!message) {
+                alert("Por favor, digite uma mensagem.");
+                return;
+            }
+
+            // UI Feedback
+            btn.disabled = true;
+            btn.innerText = "Classificando...";
+            resultArea.style.display = 'none';
+
+            try {
+                const response = await fetch('/classificar', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ mensagem: message })
+                });
+
+                if (!response.ok) {
+                    throw new Error("Erro na requisição");
+                }
+
+                const data = await response.json();
+
+                // Seta os valores
+                categoryResult.innerText = data.categoria;
+                explanationResult.innerText = data.explicacao;
+                solutionResult.innerText = data.solucao;
+                confidenceResult.innerText = data.confianca;
+
+                // Mostra resultado
+                resultArea.style.display = 'block';
+
+            } catch (error) {
+                console.error(error);
+                alert("Ocorreu um erro ao classificar a mensagem.");
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Classificar Mensagem";
+            }
+        }
+    </script>
+
+</body>
+
+</html>
